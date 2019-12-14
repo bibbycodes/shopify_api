@@ -11,7 +11,7 @@ class ShopifyApiParser:
   def __init__(self, api_key, api_pass):
     self.api_key = api_key
     self.api_pass = api_pass
-    self.base_url = "https://{}:{}@themoflo.myshopify.com/admin/api/2019-10/{}.json"
+    self.base_url = "https://{}:{}@themoflo.myshopify.com/admin/api/2019-10/{}.json?status=any"
 
   def parse_all_orders(self, array_of_orders):
     parsed_orders = []
@@ -19,7 +19,6 @@ class ShopifyApiParser:
       parsed_orders.append(self.parse_order(order))
 
     return parsed_orders
-
 
   def fetch_endpoint(self, endpoint):
     url = self.base_url.format(self.api_key, self.api_pass, endpoint)
@@ -58,10 +57,29 @@ class ShopifyApiParser:
 
     return parsed
 
+
+class ShopifyWebHook:
+  def parse_webhook_order(self, response):
+    json = json.loads(response)
+    parsed = {
+      "id" : json["id"],
+      "email" : json["email"],
+      "contact_email": json["contact_email"],
+      "total_line_items_price" : json["total_line_items_price"],
+      "total_price" :json["total_price"],
+      "accepts_marketing" : json["buyer_accepts_marketing"],
+      "cancelled_at" : json["cancelled_at"],
+      "user_id" : json["user_id"],
+      "fulfillment_status" : json["fulfillment_status"],
+      "order_status_url" : json["order_status_url"],
+      "line_items" : json["line_items"],
+      "billing_address" : json["billing_address"],
+      "customer" : json["customer"]
+    }
+
+    return response
+
+
 MoFLo = ShopifyApiParser(api_key, api_pass)
 unparserd_orders = MoFLo.fetch_endpoint("orders")
 parsed_orders = MoFLo.parse_all_orders(unparserd_orders)
-
-for order in parsed_orders:
-  print(order)
-  print("\n")
